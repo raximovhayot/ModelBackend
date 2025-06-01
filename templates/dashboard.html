@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}Statistika - DDoS Hujumlarini Aniqlash Tizimi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-chart-line"></i> Trafik Statistikasi
+            </div>
+            <div class="card-body">
+                <p class="lead">
+                    Bu sahifa tarmoq trafigi va DDoS hujumlari to'g'risida batafsil statistik ma'lumotlarni ko'rsatadi.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Queue Stats Card -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-tasks"></i> Navbat Statistikasi
+            </div>
+            <div class="card-body" id="queue-stats">
+                <div class="text-center">
+                    <p>Navbat ma'lumotlarini yuklash...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Traffic Volume Card -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-exchange-alt"></i> Trafik Hajmi
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="traffic-volume-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Detection Distribution Card -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-chart-pie"></i> Aniqlash Taqsimoti
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="detection-distribution-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Processing Time Card -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-clock"></i> Qayta Ishlash Vaqti
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="processing-time-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Function to update queue statistics
+    function updateQueueStats() {
+        fetch('/api/queue-stats')
+            .then(response => response.json())
+            .then(data => {
+                let html = `
+                    <div class="list-group">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Navbat nomi
+                            <span class="badge bg-primary rounded-pill">${data.queue_name}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Navbatdagi ishlar
+                            <span class="badge bg-warning rounded-pill">${data.queued_jobs}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Bajarilgan ishlar
+                            <span class="badge bg-success rounded-pill">${data.completed_jobs}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Muvaffaqiyatsiz ishlar
+                            <span class="badge bg-danger rounded-pill">${data.failed_jobs}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Ishchilar
+                            <span class="badge bg-info rounded-pill">${data.workers}</span>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('queue-stats').innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error fetching queue stats:', error);
+                document.getElementById('queue-stats').innerHTML = `
+                    <div class="alert alert-danger">
+                        <p>Navbat ma'lumotlarini yuklashda xatolik yuz berdi.</p>
+                    </div>
+                `;
+            });
+    }
+
+    // Initialize charts
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize traffic volume chart
+        const trafficCtx = document.getElementById('traffic-volume-chart').getContext('2d');
+        const trafficChart = new Chart(trafficCtx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: 10}, (_, i) => `${i+1} min ago`),
+                datasets: [{
+                    label: 'Trafik hajmi (paketlar/s)',
+                    data: Array(10).fill(0),
+                    borderColor: '#007bff',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Initialize detection distribution chart
+        const distributionCtx = document.getElementById('detection-distribution-chart').getContext('2d');
+        const distributionChart = new Chart(distributionCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Benign', 'Syn', 'UDP', 'UDPLag', 'LDAP', 'MSSQL', 'NetBIOS', 'Portmap'],
+                datasets: [{
+                    data: [0, 0, 0, 0, 0, 0, 0, 0],
+                    backgroundColor: [
+                        '#28a745', // Benign
+                        '#dc3545', // Syn
+                        '#fd7e14', // UDP
+                        '#ffc107', // UDPLag
+                        '#6f42c1', // LDAP
+                        '#e83e8c', // MSSQL
+                        '#20c997', // NetBIOS
+                        '#17a2b8'  // Portmap
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+
+        // Initialize processing time chart
+        const timeCtx = document.getElementById('processing-time-chart').getContext('2d');
+        const timeChart = new Chart(timeCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Navbat', 'Qayta ishlash', 'Jami'],
+                datasets: [{
+                    label: 'O\'rtacha vaqt (ms)',
+                    data: [0, 0, 0],
+                    backgroundColor: [
+                        'rgba(255, 193, 7, 0.5)',  // Queue time
+                        'rgba(23, 162, 184, 0.5)', // Processing time
+                        'rgba(40, 167, 69, 0.5)'   // Total time
+                    ],
+                    borderColor: [
+                        'rgb(255, 193, 7)',
+                        'rgb(23, 162, 184)',
+                        'rgb(40, 167, 69)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Fetch network data for statistics
+        fetch('/api/network-data/list?limit=100')
+            .then(response => response.json())
+            .then(data => {
+                if (data.count > 0) {
+                    // Update detection distribution chart
+                    const counts = {
+                        'Benign': 0,
+                        'Syn': 0,
+                        'UDP': 0,
+                        'UDPLag': 0,
+                        'LDAP': 0,
+                        'MSSQL': 0,
+                        'NetBIOS': 0,
+                        'Portmap': 0
+                    };
+                    
+                    for (const detection of data.data) {
+                        if (counts[detection.predicted_label] !== undefined) {
+                            counts[detection.predicted_label]++;
+                        }
+                    }
+                    
+                    distributionChart.data.datasets[0].data = [
+                        counts['Benign'],
+                        counts['Syn'],
+                        counts['UDP'],
+                        counts['UDPLag'],
+                        counts['LDAP'],
+                        counts['MSSQL'],
+                        counts['NetBIOS'],
+                        counts['Portmap']
+                    ];
+                    distributionChart.update();
+                }
+            })
+            .catch(error => console.error('Error fetching network data:', error));
+
+        // Fetch initial queue stats
+        updateQueueStats();
+        
+        // Update queue stats every 5 seconds
+        setInterval(updateQueueStats, 5000);
+    });
+</script>
+{% endblock %}

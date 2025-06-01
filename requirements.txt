@@ -9,3 +9,5 @@ seaborn==0.13.0
 xgboost==2.0.0
 Flask-SocketIO==5.3.6
 eventlet==0.33.3
+redis==5.0.1
+rq==1.15.1

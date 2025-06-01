@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Qanday ishlaydi - DDoS Hujumlarini Aniqlash Tizimi{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-info-circle"></i> Tizim qanday avtomatik ishlaydi
+            </div>
+            <div class="card-body">
+                <h2>Avtomatlashtirilgan DDoS Hujumlarini Aniqlash Tizimi</h2>
+                <p class="lead">
+                    Ushbu hujjat bizning DDoS hujumlarini aniqlash tizimimiz qanday avtomatik ishlashini, tarmoq ma'lumotlarini qabul qilishdan tortib aniqlash natijalarini ko'rsatishgacha tushuntiradi.
+                </p>
+
+                <div class="mt-4">
+                    <h3>Tizim haqida umumiy ma'lumot</h3>
+                    <p>
+                        Bizning DDoS hujumlarini aniqlash tizimimiz tarmoq trafigi ma'lumotlarini avtomatik qayta ishlash, potentsial DDoS hujumlarini aniqlash va natijalarni real vaqt rejimida ko'rsatish uchun mo'ljallangan. Tizim yuqori hajmdagi trafikni samarali boshqarish uchun navbat mexanizmidan foydalanadi.
+                    </p>
+                </div>
+
+                <div class="mt-4">
+                    <h3>Avtomatlashtirilgan ish jarayoni</h3>
+                    <ol class="list-group list-group-numbered">
+                        <li class="list-group-item">
+                            <strong>Ma'lumotlarni qabul qilish:</strong> Tarmoq trafigi ma'lumotlari API nuqtasi <code>/api/network-data</code> orqali qabul qilinadi.
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Ma'lumotlarni navbatga qo'yish:</strong> Ma'lumotlarni darhol qayta ishlash o'rniga, ular asinxron qayta ishlash uchun Redis navbatiga joylashtiriladi.
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Fonda qayta ishlash:</strong> Ishchi jarayonlar navbatni doimiy ravishda kuzatib boradi va ma'lumotlar kelishi bilan ularni qayta ishlaydi.
+                        </li>
+                        <li class="list-group-item">
+                            <strong>ML bashorati:</strong> Ishchi DDoS hujumlarini aniqlash uchun mashinali o'rganish modelidan foydalanib ma'lumotlarni qayta ishlaydi.
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Ma'lumotlar bazasida saqlash:</strong> Natijalar tarixiy tahlil uchun ma'lumotlar bazasida saqlanadi.
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Real vaqt rejimidagi yangilanishlar:</strong> Natijalar WebSockets yordamida darhol barcha ulangan boshqaruv panellariga uzatiladi.
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="mt-4">
+                    <h3>Navbat tizimining afzalliklari</h3>
+                    <div class="card-group">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Yaxshilangan javob vaqti</h5>
+                                <p class="card-text">
+                                    API qayta ishlash tugashini kutmasdan ma'lumotlarni qabul qilganligini tezda tasdiqlashi mumkin, bu mijozlar uchun tezroq javob vaqtlarini ta'minlaydi.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Masshtablilik</h5>
+                                <p class="card-text">
+                                    Yuqori yuklamani boshqarish uchun bir nechta ishchi jarayonlarni qo'shish mumkin, bu tizimga gorizontal ravishda kengayish imkonini beradi.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Ishonchlilik</h5>
+                                <p class="card-text">
+                                    Agar qayta ishlash muvaffaqiyatsiz bo'lsa, ish navbatda qoladi va qayta urinish mumkin, bu hech qanday ma'lumot yo'qolmasligini ta'minlaydi.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <h3>Real vaqt rejimidagi boshqaruv paneli yangilanishlari</h3>
+                    <p>
+                        Ishchi tarmoq ma'lumotlari elementini qayta ishlashni yakunlaganida:
+                    </p>
+                    <ol>
+                        <li>Natijalar ma'lumotlar bazasida saqlanadi</li>
+                        <li>Ishchi WebSockets yordamida natijalarni barcha ulangan mijozlarga uzatadi</li>
+                        <li>Boshqaruv paneli sahifani yangilashni talab qilmasdan yangi ma'lumotlarni ko'rsatish uchun avtomatik ravishda yangilanadi</li>
+                    </ol>
+                    <p>
+                        Bu tarmoq trafigi va potentsial DDoS hujumlarining uzluksiz, real vaqt rejimidagi ko'rinishini ta'minlaydi.
+                    </p>
+                </div>
+
+                <div class="mt-4">
+                    <h3>Tizimni ishga tushirish</h3>
+                    <p>
+                        Tizimni ishga tushirish uchun ikkita komponentni ishga tushirishingiz kerak:
+                    </p>
+                    <ol>
+                        <li>
+                            <strong>Flask ilovasi:</strong> Bu veb-interfeys va API nuqtalarini ta'minlaydi.
+                            <pre><code>python app.py</code></pre>
+                        </li>
+                        <li>
+                            <strong>Ishchi jarayon:</strong> Bu navbatdagi ishlarni qayta ishlaydi.
+                            <pre><code>python worker.py</code></pre>
+                        </li>
+                    </ol>
+                    <p>
+                        Tizimning to'g'ri ishlashi uchun ikkala komponent ham ishlab turishi kerak. Qayta ishlash quvvatini oshirish uchun bir nechta ishchi jarayonlarni ishga tushirishingiz mumkin.
+                    </p>
+                </div>
+
+                <div class="mt-4">
+                    <h3>Tizimni nazorat qilish</h3>
+                    <p>
+                        Tizim ishlashini quyidagilar orqali kuzatishingiz mumkin:
+                    </p>
+                    <ul>
+                        <li>Asosiy boshqaruv paneli <a href="/">/</a> manzilida, u so'nggi aniqlashlar va navbat statistikasini ko'rsatadi</li>
+                        <li>Batafsil boshqaruv paneli <a href="/dashboard">/dashboard</a> manzilida, u batafsilroq statistikani ko'rsatadi</li>
+                        <li>Tarix sahifasi <a href="/history">/history</a> manzilida, u tarixiy aniqlash ma'lumotlarini ko'rsatadi</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

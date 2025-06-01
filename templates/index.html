@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Boshqaruv paneli - DDoS Aniqlash Tizimi{% endblock %}
+{% block title %}Boshqaruv paneli - DDoS Hujumlarini Aniqlash Tizimi{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-md-12">
         <div class="card">
             <div class="card-header bg-primary text-white">
-                <i class="fas fa-tachometer-alt"></i> DDoS Aniqlash Boshqaruv paneli
+                <i class="fas fa-tachometer-alt"></i> DDoS Hujumlarini Aniqlash Boshqaruv paneli
             </div>
             <div class="card-body">
                 <p class="lead">
-                    DDoS Aniqlash Tizimiga xush kelibsiz. Ushbu boshqaruv paneli real vaqt rejimida tarmoq trafigi tahlili va DDoS hujumlarini aniqlashni ko'rsatadi.
+                    DDoS Hujumlarini Aniqlash Tizimiga xush kelibsiz. Ushbu boshqaruv paneli real vaqt rejimida tarmoq trafigi tahlili va DDoS hujumlarini aniqlashni ko'rsatadi.
                 </p>
             </div>
         </div>
@@ -20,7 +20,7 @@
 
 <div class="row">
     <!-- Latest Detection Card -->
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="card">
             <div class="card-header">
                 <i class="fas fa-shield-alt"></i> So'nggi Aniqlash
@@ -34,7 +34,7 @@
     </div>
 
     <!-- Detection Stats Card -->
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="card">
             <div class="card-header">
                 <i class="fas fa-chart-pie"></i> Aniqlash Statistikasi
@@ -42,6 +42,20 @@
             <div class="card-body">
                 <div class="chart-container">
                     <canvas id="detection-stats-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Queue Stats Card -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-tasks"></i> Navbat Statistikasi
+            </div>
+            <div class="card-body" id="queue-stats">
+                <div class="text-center">
+                    <p>Navbat ma'lumotlarini yuklash...</p>
                 </div>
             </div>
         </div>
@@ -244,8 +258,54 @@
         addDetection(data);
     });
 
+    // Function to update queue statistics
+    function updateQueueStats() {
+        fetch('/api/queue-stats')
+            .then(response => response.json())
+            .then(data => {
+                let html = `
+                    <div class="list-group">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Navbat nomi
+                            <span class="badge bg-primary rounded-pill">${data.queue_name}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Navbatdagi ishlar
+                            <span class="badge bg-warning rounded-pill">${data.queued_jobs}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Bajarilgan ishlar
+                            <span class="badge bg-success rounded-pill">${data.completed_jobs}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Muvaffaqiyatsiz ishlar
+                            <span class="badge bg-danger rounded-pill">${data.failed_jobs}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            Ishchilar
+                            <span class="badge bg-info rounded-pill">${data.workers}</span>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('queue-stats').innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Error fetching queue stats:', error);
+                document.getElementById('queue-stats').innerHTML = `
+                    <div class="alert alert-danger">
+                        <p>Navbat ma'lumotlarini yuklashda xatolik yuz berdi.</p>
+                    </div>
+                `;
+            });
+    }
+
+    // Update queue stats every 5 seconds
+    setInterval(updateQueueStats, 5000);
+
     // Fetch initial data when the page loads
     document.addEventListener('DOMContentLoaded', function() {
+        // Fetch network data
         fetch('/api/network-data/list?limit=10')
             .then(response => response.json())
             .then(data => {
@@ -265,6 +325,9 @@
                 }
             })
             .catch(error => console.error('Error fetching initial data:', error));
+
+        // Fetch initial queue stats
+        updateQueueStats();
     });
 </script>
 {% endblock %}

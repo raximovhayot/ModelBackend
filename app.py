@@ -7,6 +7,7 @@ from flask_socketio import SocketIO
 from models import ModelService
 from database import init_db, DatabaseService
 from api import NetworkDataAPI, NetworkDataListAPI, NetworkDataDetailAPI, NetworkDataByLabelAPI
+from api.network_data_api import QueueStatsAPI
 
 # Create Flask app
 app = Flask(__name__)
@@ -40,6 +41,7 @@ api.add_resource(
 api.add_resource(NetworkDataListAPI, '/api/network-data/list')
 api.add_resource(NetworkDataDetailAPI, '/api/network-data/<int:id>')
 api.add_resource(NetworkDataByLabelAPI, '/api/network-data/label/<string:label>')
+api.add_resource(QueueStatsAPI, '/api/queue-stats')
 
 # Frontend routes
 @app.route('/')
@@ -69,6 +71,13 @@ def about():
     Render the about page
     """
     return render_template('about.html')
+
+@app.route('/explanation')
+def explanation():
+    """
+    Render the explanation page
+    """
+    return render_template('explanation.html')
 
 @app.route('/clear', methods=['POST'])
 def clear_application():

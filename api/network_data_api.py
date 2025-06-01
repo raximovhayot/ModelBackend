@@ -5,6 +5,7 @@ import json
 from models import ModelService
 from database import DatabaseService
 from flow.flow_features import FlowFeatures
+from queue_service import enqueue_network_data, get_queue_stats
 
 class NetworkDataAPI(Resource):
     """
@@ -15,7 +16,7 @@ class NetworkDataAPI(Resource):
 
     def post(self):
         """
-        Receive network data, make prediction, and store in database
+        Receive network data, enqueue for processing, and return job ID
         """
         try:
             # Get data from request
@@ -32,45 +33,16 @@ class NetworkDataAPI(Resource):
             except Exception as e:
                 return {"error": f"Invalid flow features data: {str(e)}"}, 400
 
-            # Make prediction
-            prediction_result = self.model_service.predict(data)
+            # Enqueue data for processing
+            job_id = enqueue_network_data(data, flow_features.to_dict())
 
-            # Check if prediction contains an error
-            if "error" in prediction_result:
-                return {"error": prediction_result["error"]}, 500
-
-            # Store data and prediction in database
-            network_data = DatabaseService.add_network_data(data, prediction_result)
-
-            # Emit network data to connected clients
-            from app import emit_network_data
-            emit_network_data(network_data)
-
-            # Return prediction result
+            # Return job ID and status
             return {
-                "id": network_data.id,
-                "timestamp": network_data.timestamp.isoformat(),
-                "prediction": {
-                    "class": network_data.predicted_class,
-                    "label": network_data.predicted_label,
-                    "confidence": network_data.prediction_confidence,
-                    "probabilities": json.loads(network_data.class_probabilities)
-                },
-                "data": {
-                    "flow_duration": network_data.flow_duration,
-                    "protocol": network_data.protocol,
-                    "flow_bytes_s": network_data.flow_bytes_s,
-                    "flow_packets_s": network_data.flow_packets_s,
-                    "packet_length_mean": network_data.packet_length_mean,
-                    "packet_length_std": network_data.packet_length_std,
-                    "packet_length_min": network_data.packet_length_min,
-                    "packet_length_max": network_data.packet_length_max,
-                    "source_ip": network_data.source_ip,
-                    "destination_ip": network_data.destination_ip,
-                    "source_port": network_data.source_port,
-                    "destination_port": network_data.destination_port
-                }
-            }, 201
+                "success": True,
+                "message": "Network data enqueued for processing",
+                "job_id": job_id,
+                "queue_stats": get_queue_stats()
+            }, 202
 
         except Exception as e:
             return {"error": str(e)}, 500
@@ -140,6 +112,23 @@ class NetworkDataByLabelAPI(Resource):
             result = [data.to_dict() for data in network_data_list]
 
             return {"data": result, "count": len(result)}, 200
+
+        except Exception as e:
+            return {"error": str(e)}, 500
+
+class QueueStatsAPI(Resource):
+    """
+    API for retrieving queue statistics
+    """
+    def get(self):
+        """
+        Get queue statistics
+        """
+        try:
+            # Get queue statistics
+            stats = get_queue_stats()
+
+            return stats, 200
 
         except Exception as e:
             return {"error": str(e)}, 500
