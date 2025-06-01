@@ -4,6 +4,7 @@ import json
 
 from models import ModelService
 from database import DatabaseService
+from flow.flow_features import FlowFeatures
 
 class NetworkDataAPI(Resource):
     """
@@ -18,10 +19,18 @@ class NetworkDataAPI(Resource):
         """
         try:
             # Get data from request
-            data = request.get_json()
+            json_data = request.get_json()
 
-            if not data:
+            if not json_data:
                 return {"error": "No data provided"}, 400
+
+            # Convert JSON data to FlowFeatures instance
+            try:
+                flow_features = FlowFeatures.from_json(json_data)
+                # Convert FlowFeatures to dictionary format expected by the model and database service
+                data = flow_features.to_model_dict()
+            except Exception as e:
+                return {"error": f"Invalid flow features data: {str(e)}"}, 400
 
             # Make prediction
             prediction_result = self.model_service.predict(data)
