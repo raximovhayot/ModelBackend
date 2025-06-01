@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - DDoS Detection System{% endblock %}
+{% block title %}Boshqaruv paneli - DDoS Aniqlash Tizimi{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-md-12">
         <div class="card">
             <div class="card-header bg-primary text-white">
-                <i class="fas fa-tachometer-alt"></i> DDoS Detection Dashboard
+                <i class="fas fa-tachometer-alt"></i> DDoS Aniqlash Boshqaruv paneli
             </div>
             <div class="card-body">
                 <p class="lead">
-                    Welcome to the DDoS Detection System. This dashboard displays real-time network traffic analysis and DDoS attack detection.
+                    DDoS Aniqlash Tizimiga xush kelibsiz. Ushbu boshqaruv paneli real vaqt rejimida tarmoq trafigi tahlili va DDoS hujumlarini aniqlashni ko'rsatadi.
                 </p>
             </div>
         </div>
@@ -23,21 +23,21 @@
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <i class="fas fa-shield-alt"></i> Latest Detection
+                <i class="fas fa-shield-alt"></i> So'nggi Aniqlash
             </div>
             <div class="card-body" id="latest-detection">
                 <div class="text-center">
-                    <p>Waiting for network data...</p>
+                    <p>Tarmoq ma'lumotlarini kutmoqda...</p>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- Detection Stats Card -->
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <i class="fas fa-chart-pie"></i> Detection Statistics
+                <i class="fas fa-chart-pie"></i> Aniqlash Statistikasi
             </div>
             <div class="card-body">
                 <div class="chart-container">
@@ -53,25 +53,25 @@
     <div class="col-md-12">
         <div class="card">
             <div class="card-header">
-                <i class="fas fa-table"></i> Recent Detections
+                <i class="fas fa-table"></i> So'nggi Aniqlashlar
             </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
                         <thead>
                             <tr>
-                                <th>Time</th>
-                                <th>Source IP</th>
-                                <th>Destination IP</th>
-                                <th>Protocol</th>
-                                <th>Prediction</th>
-                                <th>Confidence</th>
-                                <th>Details</th>
+                                <th>Vaqt</th>
+                                <th>Manba IP</th>
+                                <th>Manzil IP</th>
+                                <th>Protokol</th>
+                                <th>Bashorat</th>
+                                <th>Ishonch</th>
+                                <th>Tafsilotlar</th>
                             </tr>
                         </thead>
                         <tbody id="recent-detections-table">
                             <tr>
-                                <td colspan="7" class="text-center">No data available</td>
+                                <td colspan="7" class="text-center">Ma'lumot mavjud emas</td>
                             </tr>
                         </tbody>
                     </table>
@@ -114,7 +114,7 @@
             }
         }
     });
-    
+
     // Store detection counts
     const detectionCounts = {
         'Benign': 0,
@@ -126,46 +126,46 @@
         'NetBIOS': 0,
         'Portmap': 0
     };
-    
+
     // Store recent detections
     const recentDetections = [];
     const maxRecentDetections = 10;
-    
+
     // Function to update the latest detection card
     function updateLatestDetection(data) {
         const isAttack = data.prediction.label !== 'Benign';
         const alertClass = isAttack ? 'alert-attack' : 'alert-benign';
         const icon = isAttack ? 'fa-exclamation-triangle' : 'fa-check-circle';
-        
+
         let html = `
             <div class="alert ${alertClass}">
-                <h5><i class="fas ${icon}"></i> ${isAttack ? 'Attack Detected!' : 'Normal Traffic'}</h5>
-                <p><strong>Type:</strong> <span class="${getLabelColor(data.prediction.label)}">${data.prediction.label}</span></p>
-                <p><strong>Confidence:</strong> ${(data.prediction.confidence * 100).toFixed(2)}%</p>
-                <p><strong>Time:</strong> ${formatTimestamp(data.timestamp)}</p>
+                <h5><i class="fas ${icon}"></i> ${isAttack ? 'Hujum aniqlandi!' : 'Normal trafik'}</h5>
+                <p><strong>Turi:</strong> <span class="${getLabelColor(data.prediction.label)}">${data.prediction.label}</span></p>
+                <p><strong>Ishonch:</strong> ${(data.prediction.confidence * 100).toFixed(2)}%</p>
+                <p><strong>Vaqt:</strong> ${formatTimestamp(data.timestamp)}</p>
             </div>
             <div class="row">
                 <div class="col-md-6">
-                    <p><strong>Source:</strong> ${data.data.source_ip}:${data.data.source_port}</p>
-                    <p><strong>Destination:</strong> ${data.data.destination_ip}:${data.data.destination_port}</p>
-                    <p><strong>Protocol:</strong> ${data.data.protocol}</p>
+                    <p><strong>Manba:</strong> ${data.data.source_ip}:${data.data.source_port}</p>
+                    <p><strong>Manzil:</strong> ${data.data.destination_ip}:${data.data.destination_port}</p>
+                    <p><strong>Protokol:</strong> ${data.data.protocol}</p>
                 </div>
                 <div class="col-md-6">
-                    <p><strong>Flow Duration:</strong> ${data.data.flow_duration} ms</p>
-                    <p><strong>Flow Bytes/s:</strong> ${data.data.flow_bytes_s}</p>
-                    <p><strong>Flow Packets/s:</strong> ${data.data.flow_packets_s}</p>
+                    <p><strong>Oqim davomiyligi:</strong> ${data.data.flow_duration} ms</p>
+                    <p><strong>Oqim baytlari/s:</strong> ${data.data.flow_bytes_s}</p>
+                    <p><strong>Oqim paketlari/s:</strong> ${data.data.flow_packets_s}</p>
                 </div>
             </div>
         `;
-        
+
         document.getElementById('latest-detection').innerHTML = html;
     }
-    
+
     // Function to update the detection stats chart
     function updateDetectionStats(label) {
         // Increment the count for this label
         detectionCounts[label]++;
-        
+
         // Update the chart data
         statsChart.data.datasets[0].data = [
             detectionCounts['Benign'],
@@ -177,28 +177,28 @@
             detectionCounts['NetBIOS'],
             detectionCounts['Portmap']
         ];
-        
+
         // Update the chart
         statsChart.update();
     }
-    
+
     // Function to update the recent detections table
     function updateRecentDetectionsTable() {
         if (recentDetections.length === 0) {
             document.getElementById('recent-detections-table').innerHTML = `
                 <tr>
-                    <td colspan="7" class="text-center">No data available</td>
+                    <td colspan="7" class="text-center">Ma'lumot mavjud emas</td>
                 </tr>
             `;
             return;
         }
-        
+
         let html = '';
-        
+
         for (const detection of recentDetections) {
             const isAttack = detection.prediction.label !== 'Benign';
             const rowClass = isAttack ? 'table-danger' : 'table-success';
-            
+
             html += `
                 <tr class="${rowClass}">
                     <td>${formatTimestamp(detection.timestamp)}</td>
@@ -215,35 +215,35 @@
                 </tr>
             `;
         }
-        
+
         document.getElementById('recent-detections-table').innerHTML = html;
     }
-    
+
     // Function to add a new detection
     function addDetection(data) {
         // Add to recent detections
         recentDetections.unshift(data);
-        
+
         // Keep only the most recent detections
         if (recentDetections.length > maxRecentDetections) {
             recentDetections.pop();
         }
-        
+
         // Update the latest detection card
         updateLatestDetection(data);
-        
+
         // Update the detection stats
         updateDetectionStats(data.prediction.label);
-        
+
         // Update the recent detections table
         updateRecentDetectionsTable();
     }
-    
+
     // Listen for new network data events from the server
     socket.on('new_network_data', function(data) {
         addDetection(data);
     });
-    
+
     // Fetch initial data when the page loads
     document.addEventListener('DOMContentLoaded', function() {
         fetch('/api/network-data/list?limit=10')
@@ -259,7 +259,7 @@
                             confidence: detection.prediction_confidence,
                             probabilities: JSON.parse(detection.class_probabilities)
                         };
-                        
+
                         addDetection(detection);
                     }
                 }
