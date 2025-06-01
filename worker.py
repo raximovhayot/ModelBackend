@@ -8,7 +8,7 @@ from rq import Worker, Queue, Connection
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Initialize Redis connection
-redis_url = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+redis_url = os.environ.get('REDIS_URL', 'redis://:root123@localhost:6379/0')
 redis_conn = Redis.from_url(redis_url)
 
 # Define the queue name
