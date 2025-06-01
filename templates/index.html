@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - DDoS Detection System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-tachometer-alt"></i> DDoS Detection Dashboard
+            </div>
+            <div class="card-body">
+                <p class="lead">
+                    Welcome to the DDoS Detection System. This dashboard displays real-time network traffic analysis and DDoS attack detection.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Latest Detection Card -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-shield-alt"></i> Latest Detection
+            </div>
+            <div class="card-body" id="latest-detection">
+                <div class="text-center">
+                    <p>Waiting for network data...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Detection Stats Card -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-chart-pie"></i> Detection Statistics
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="detection-stats-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Detections Table -->
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-table"></i> Recent Detections
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Source IP</th>
+                                <th>Destination IP</th>
+                                <th>Protocol</th>
+                                <th>Prediction</th>
+                                <th>Confidence</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-detections-table">
+                            <tr>
+                                <td colspan="7" class="text-center">No data available</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize detection stats chart
+    const statsCtx = document.getElementById('detection-stats-chart').getContext('2d');
+    const statsChart = new Chart(statsCtx, {
+        type: 'pie',
+        data: {
+            labels: ['Benign', 'Syn', 'UDP', 'UDPLag', 'LDAP', 'MSSQL', 'NetBIOS', 'Portmap'],
+            datasets: [{
+                data: [0, 0, 0, 0, 0, 0, 0, 0],
+                backgroundColor: [
+                    '#28a745', // Benign
+                    '#dc3545', // Syn
+                    '#fd7e14', // UDP
+                    '#ffc107', // UDPLag
+                    '#6f42c1', // LDAP
+                    '#e83e8c', // MSSQL
+                    '#20c997', // NetBIOS
+                    '#17a2b8'  // Portmap
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+    
+    // Store detection counts
+    const detectionCounts = {
+        'Benign': 0,
+        'Syn': 0,
+        'UDP': 0,
+        'UDPLag': 0,
+        'LDAP': 0,
+        'MSSQL': 0,
+        'NetBIOS': 0,
+        'Portmap': 0
+    };
+    
+    // Store recent detections
+    const recentDetections = [];
+    const maxRecentDetections = 10;
+    
+    // Function to update the latest detection card
+    function updateLatestDetection(data) {
+        const isAttack = data.prediction.label !== 'Benign';
+        const alertClass = isAttack ? 'alert-attack' : 'alert-benign';
+        const icon = isAttack ? 'fa-exclamation-triangle' : 'fa-check-circle';
+        
+        let html = `
+            <div class="alert ${alertClass}">
+                <h5><i class="fas ${icon}"></i> ${isAttack ? 'Attack Detected!' : 'Normal Traffic'}</h5>
+                <p><strong>Type:</strong> <span class="${getLabelColor(data.prediction.label)}">${data.prediction.label}</span></p>
+                <p><strong>Confidence:</strong> ${(data.prediction.confidence * 100).toFixed(2)}%</p>
+                <p><strong>Time:</strong> ${formatTimestamp(data.timestamp)}</p>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Source:</strong> ${data.data.source_ip}:${data.data.source_port}</p>
+                    <p><strong>Destination:</strong> ${data.data.destination_ip}:${data.data.destination_port}</p>
+                    <p><strong>Protocol:</strong> ${data.data.protocol}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Flow Duration:</strong> ${data.data.flow_duration} ms</p>
+                    <p><strong>Flow Bytes/s:</strong> ${data.data.flow_bytes_s}</p>
+                    <p><strong>Flow Packets/s:</strong> ${data.data.flow_packets_s}</p>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('latest-detection').innerHTML = html;
+    }
+    
+    // Function to update the detection stats chart
+    function updateDetectionStats(label) {
+        // Increment the count for this label
+        detectionCounts[label]++;
+        
+        // Update the chart data
+        statsChart.data.datasets[0].data = [
+            detectionCounts['Benign'],
+            detectionCounts['Syn'],
+            detectionCounts['UDP'],
+            detectionCounts['UDPLag'],
+            detectionCounts['LDAP'],
+            detectionCounts['MSSQL'],
+            detectionCounts['NetBIOS'],
+            detectionCounts['Portmap']
+        ];
+        
+        // Update the chart
+        statsChart.update();
+    }
+    
+    // Function to update the recent detections table
+    function updateRecentDetectionsTable() {
+        if (recentDetections.length === 0) {
+            document.getElementById('recent-detections-table').innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center">No data available</td>
+                </tr>
+            `;
+            return;
+        }
+        
+        let html = '';
+        
+        for (const detection of recentDetections) {
+            const isAttack = detection.prediction.label !== 'Benign';
+            const rowClass = isAttack ? 'table-danger' : 'table-success';
+            
+            html += `
+                <tr class="${rowClass}">
+                    <td>${formatTimestamp(detection.timestamp)}</td>
+                    <td>${detection.data.source_ip}</td>
+                    <td>${detection.data.destination_ip}</td>
+                    <td>${detection.data.protocol}</td>
+                    <td class="${getLabelColor(detection.prediction.label)}">${detection.prediction.label}</td>
+                    <td>${(detection.prediction.confidence * 100).toFixed(2)}%</td>
+                    <td>
+                        <a href="/api/network-data/${detection.id}" target="_blank" class="btn btn-sm btn-info">
+                            <i class="fas fa-info-circle"></i>
+                        </a>
+                    </td>
+                </tr>
+            `;
+        }
+        
+        document.getElementById('recent-detections-table').innerHTML = html;
+    }
+    
+    // Function to add a new detection
+    function addDetection(data) {
+        // Add to recent detections
+        recentDetections.unshift(data);
+        
+        // Keep only the most recent detections
+        if (recentDetections.length > maxRecentDetections) {
+            recentDetections.pop();
+        }
+        
+        // Update the latest detection card
+        updateLatestDetection(data);
+        
+        // Update the detection stats
+        updateDetectionStats(data.prediction.label);
+        
+        // Update the recent detections table
+        updateRecentDetectionsTable();
+    }
+    
+    // Listen for new network data events from the server
+    socket.on('new_network_data', function(data) {
+        addDetection(data);
+    });
+    
+    // Fetch initial data when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/api/network-data/list?limit=10')
+            .then(response => response.json())
+            .then(data => {
+                if (data.count > 0) {
+                    // Add each detection to the UI
+                    for (const detection of data.data.reverse()) {
+                        // Convert class_probabilities from string to object
+                        detection.prediction = {
+                            class: detection.predicted_class,
+                            label: detection.predicted_label,
+                            confidence: detection.prediction_confidence,
+                            probabilities: JSON.parse(detection.class_probabilities)
+                        };
+                        
+                        addDetection(detection);
+                    }
+                }
+            })
+            .catch(error => console.error('Error fetching initial data:', error));
+    });
+</script>
+{% endblock %}

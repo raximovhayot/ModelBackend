@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}History - DDoS Detection System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-history"></i> Detection History
+            </div>
+            <div class="card-body">
+                <p class="lead">
+                    View historical network traffic data and DDoS attack detections.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <!-- Filters -->
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-filter"></i> Filters
+            </div>
+            <div class="card-body">
+                <form id="filter-form" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="label-filter" class="form-label">Attack Type</label>
+                        <select id="label-filter" class="form-select">
+                            <option value="">All</option>
+                            <option value="Benign">Benign</option>
+                            <option value="Syn">Syn</option>
+                            <option value="UDP">UDP</option>
+                            <option value="UDPLag">UDPLag</option>
+                            <option value="LDAP">LDAP</option>
+                            <option value="MSSQL">MSSQL</option>
+                            <option value="NetBIOS">NetBIOS</option>
+                            <option value="Portmap">Portmap</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="limit-filter" class="form-label">Limit</label>
+                        <select id="limit-filter" class="form-select">
+                            <option value="50">50</option>
+                            <option value="100" selected>100</option>
+                            <option value="200">200</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i> Apply Filters
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Detection History Table -->
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-table"></i> Detection History
+                <span id="loading-indicator" class="float-end d-none">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Source IP</th>
+                                <th>Destination IP</th>
+                                <th>Protocol</th>
+                                <th>Prediction</th>
+                                <th>Confidence</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table">
+                            <tr>
+                                <td colspan="7" class="text-center">No data available</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Current filters
+    let currentFilters = {
+        label: '',
+        limit: 100
+    };
+    
+    // Function to load detection history
+    function loadDetectionHistory() {
+        // Show loading indicator
+        document.getElementById('loading-indicator').classList.remove('d-none');
+        
+        // Build the API URL with filters
+        let url = '/api/network-data/list?limit=' + currentFilters.limit;
+        
+        if (currentFilters.label) {
+            url = '/api/network-data/label/' + currentFilters.label + '?limit=' + currentFilters.limit;
+        }
+        
+        // Fetch data from the API
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading indicator
+                document.getElementById('loading-indicator').classList.add('d-none');
+                
+                if (data.count === 0) {
+                    document.getElementById('history-table').innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center">No data available</td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                // Update the table
+                updateHistoryTable(data.data);
+            })
+            .catch(error => {
+                console.error('Error fetching detection history:', error);
+                document.getElementById('loading-indicator').classList.add('d-none');
+                document.getElementById('history-table').innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center text-danger">
+                            <i class="fas fa-exclamation-circle"></i> Error loading data
+                        </td>
+                    </tr>
+                `;
+            });
+    }
+    
+    // Function to update the history table
+    function updateHistoryTable(data) {
+        let html = '';
+        
+        for (const item of data) {
+            const isAttack = item.predicted_label !== 'Benign';
+            const rowClass = isAttack ? 'table-danger' : 'table-success';
+            
+            html += `
+                <tr class="${rowClass}">
+                    <td>${formatTimestamp(item.timestamp)}</td>
+                    <td>${item.source_ip || 'N/A'}</td>
+                    <td>${item.destination_ip || 'N/A'}</td>
+                    <td>${item.protocol || 'N/A'}</td>
+                    <td class="${getLabelColor(item.predicted_label)}">${item.predicted_label}</td>
+                    <td>${(item.prediction_confidence * 100).toFixed(2)}%</td>
+                    <td>
+                        <a href="/api/network-data/${item.id}" target="_blank" class="btn btn-sm btn-info">
+                            <i class="fas fa-info-circle"></i>
+                        </a>
+                    </td>
+                </tr>
+            `;
+        }
+        
+        document.getElementById('history-table').innerHTML = html;
+    }
+    
+    // Handle filter form submission
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('filter-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get filter values
+            currentFilters.label = document.getElementById('label-filter').value;
+            currentFilters.limit = document.getElementById('limit-filter').value;
+            
+            // Load data with new filters
+            loadDetectionHistory();
+        });
+        
+        // Load initial data
+        loadDetectionHistory();
+    });
+</script>
+{% endblock %}

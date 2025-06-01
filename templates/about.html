@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}About - DDoS Detection System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-info-circle"></i> About DDoS Detection System
+            </div>
+            <div class="card-body">
+                <p class="lead">
+                    This application uses machine learning to detect and classify DDoS (Distributed Denial of Service) attacks in network traffic.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-database"></i> Dataset Information
+            </div>
+            <div class="card-body">
+                <p>
+                    The machine learning model was trained on the <strong>CICDDoS2019</strong> dataset provided by the Canadian Institute for Cybersecurity (CIC).
+                </p>
+                <p>
+                    This dataset contains network traffic data including both benign (normal) traffic and various types of DDoS attacks:
+                </p>
+                <ul>
+                    <li><strong class="benign">Benign</strong>: Normal, non-attack traffic</li>
+                    <li><strong class="syn">Syn</strong>: SYN flood attack</li>
+                    <li><strong class="udp">UDP</strong>: Generic UDP flood attack</li>
+                    <li><strong class="udplag">UDPLag</strong>: UDP-based DDoS with lag</li>
+                    <li><strong class="ldap">LDAP</strong>: Lightweight Directory Access Protocol-based attack</li>
+                    <li><strong class="mssql">MSSQL</strong>: MSSQL-specific DDoS attack</li>
+                    <li><strong class="netbios">NetBIOS</strong>: NetBIOS-related DDoS attack</li>
+                    <li><strong class="portmap">Portmap</strong>: Portmapper-based DDoS attack</li>
+                </ul>
+                <p>
+                    <a href="https://www.unb.ca/cic/datasets/ddos-2019.html" target="_blank" class="btn btn-info">
+                        <i class="fas fa-external-link-alt"></i> Learn more about the dataset
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-brain"></i> Machine Learning Model
+            </div>
+            <div class="card-body">
+                <p>
+                    The system uses a <strong>Random Forest</strong> classifier to detect and classify DDoS attacks.
+                </p>
+                <p>
+                    Several models were evaluated during development, including:
+                </p>
+                <ul>
+                    <li>Random Forest</li>
+                    <li>K-Nearest Neighbors (KNN)</li>
+                    <li>Extra Trees Classifier</li>
+                    <li>Multi-Layer Perceptron (MLP) Classifier</li>
+                    <li>XGBoost</li>
+                </ul>
+                <p>
+                    Random Forest was selected as the best model based on its balanced performance across all metrics:
+                </p>
+                <ul>
+                    <li>High accuracy in classifying different attack types</li>
+                    <li>Good generalization to new data</li>
+                    <li>Robust performance across different network conditions</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-cogs"></i> System Architecture
+            </div>
+            <div class="card-body">
+                <p>
+                    The DDoS Detection System consists of the following components:
+                </p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-server"></i> Backend</h5>
+                        <ul>
+                            <li><strong>REST API</strong>: Receives network data and returns predictions</li>
+                            <li><strong>Prediction Service</strong>: Uses the machine learning model to classify network traffic</li>
+                            <li><strong>Database</strong>: Stores network data and prediction results</li>
+                            <li><strong>WebSocket Server</strong>: Provides real-time updates to the UI</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-desktop"></i> Frontend</h5>
+                        <ul>
+                            <li><strong>Dashboard</strong>: Displays real-time network traffic and attack detection</li>
+                            <li><strong>History</strong>: Shows historical network data and detections</li>
+                            <li><strong>Charts</strong>: Visualizes detection statistics and trends</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4 mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-code"></i> Technologies Used
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5>Backend</h5>
+                        <ul>
+                            <li>Python</li>
+                            <li>Flask</li>
+                            <li>Flask-RESTful</li>
+                            <li>Flask-SQLAlchemy</li>
+                            <li>Flask-SocketIO</li>
+                            <li>scikit-learn</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5>Frontend</h5>
+                        <ul>
+                            <li>HTML/CSS/JavaScript</li>
+                            <li>Bootstrap 5</li>
+                            <li>Chart.js</li>
+                            <li>Socket.IO</li>
+                            <li>Font Awesome</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5>Data Processing</h5>
+                        <ul>
+                            <li>pandas</li>
+                            <li>NumPy</li>
+                            <li>Matplotlib</li>
+                            <li>seaborn</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
