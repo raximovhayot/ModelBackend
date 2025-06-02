@@ -1,7 +1,7 @@
 import os
 import json
 from redis import Redis
-from rq import Queue
+from rq import Queue, Worker
 from models import ModelService
 from database import DatabaseService
 
@@ -75,10 +75,13 @@ def get_queue_stats():
     Returns:
         dict: Queue statistics
     """
+    # Get count of active workers
+    worker_count = len(Worker.all(connection=redis_conn))
+
     return {
         'queued_jobs': queue.count,
         'failed_jobs': len(queue.failed_job_registry),
         'completed_jobs': len(queue.finished_job_registry),
-        'workers': len(queue.workers),
+        'workers': worker_count,
         'queue_name': queue.name
     }
