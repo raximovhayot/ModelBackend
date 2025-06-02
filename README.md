@@ -47,8 +47,20 @@ Ilova quyidagi komponentlardan iborat:
 3. O'qitilgan model faylini (`random_forest_model.pkl`) ilova katalogiga joylashtiring.
 
 4. Ilovani ishga tushiring:
+
+   Faqat Flask ilovasini ishga tushirish uchun:
    ```
    python app.py
+   ```
+
+   Faqat worker jarayonini ishga tushirish uchun:
+   ```
+   python worker.py
+   ```
+
+   Flask ilovasi va worker jarayonini bir vaqtda ishga tushirish uchun:
+   ```
+   python run.py
    ```
 
 5. Ilovaga veb-brauzeringizda `http://localhost:5000` orqali kiring
