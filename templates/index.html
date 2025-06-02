@@ -20,7 +20,7 @@
 
 <div class="row">
     <!-- Latest Detection Card -->
-    <div class="col-md-4">
+    <div class="col-md-6">
         <div class="card">
             <div class="card-header">
                 <i class="fas fa-shield-alt"></i> So'nggi Aniqlash
@@ -34,7 +34,7 @@
     </div>
 
     <!-- Detection Stats Card -->
-    <div class="col-md-4">
+    <div class="col-md-6">
         <div class="card">
             <div class="card-header">
                 <i class="fas fa-chart-pie"></i> Aniqlash Statistikasi
@@ -42,20 +42,6 @@
             <div class="card-body">
                 <div class="chart-container">
                     <canvas id="detection-stats-chart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Queue Stats Card -->
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
-                <i class="fas fa-tasks"></i> Navbat Statistikasi
-            </div>
-            <div class="card-body" id="queue-stats">
-                <div class="text-center">
-                    <p>Navbat ma'lumotlarini yuklash...</p>
                 </div>
             </div>
         </div>
@@ -89,6 +75,22 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Queue Stats Card -->
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-tasks"></i> Navbat Statistikasi
+            </div>
+            <div class="card-body" id="queue-stats">
+                <div class="text-center">
+                    <p>Navbat ma'lumotlarini yuklash...</p>
                 </div>
             </div>
         </div>
@@ -263,27 +265,34 @@
         fetch('/api/queue-stats')
             .then(response => response.json())
             .then(data => {
+                // Provide default values for any undefined properties
+                const queueName = data.queue_name || 'Ma\'lumot yo\'q';
+                const queuedJobs = data.queued_jobs !== undefined ? data.queued_jobs : 0;
+                const completedJobs = data.completed_jobs !== undefined ? data.completed_jobs : 0;
+                const failedJobs = data.failed_jobs !== undefined ? data.failed_jobs : 0;
+                const workers = data.workers !== undefined ? data.workers : 0;
+
                 let html = `
                     <div class="list-group">
                         <div class="list-group-item d-flex justify-content-between align-items-center">
                             Navbat nomi
-                            <span class="badge bg-primary rounded-pill">${data.queue_name}</span>
+                            <span class="badge bg-primary rounded-pill">${queueName}</span>
                         </div>
                         <div class="list-group-item d-flex justify-content-between align-items-center">
                             Navbatdagi ishlar
-                            <span class="badge bg-warning rounded-pill">${data.queued_jobs}</span>
+                            <span class="badge bg-warning rounded-pill">${queuedJobs}</span>
                         </div>
                         <div class="list-group-item d-flex justify-content-between align-items-center">
                             Bajarilgan ishlar
-                            <span class="badge bg-success rounded-pill">${data.completed_jobs}</span>
+                            <span class="badge bg-success rounded-pill">${completedJobs}</span>
                         </div>
                         <div class="list-group-item d-flex justify-content-between align-items-center">
                             Muvaffaqiyatsiz ishlar
-                            <span class="badge bg-danger rounded-pill">${data.failed_jobs}</span>
+                            <span class="badge bg-danger rounded-pill">${failedJobs}</span>
                         </div>
                         <div class="list-group-item d-flex justify-content-between align-items-center">
                             Ishchilar
-                            <span class="badge bg-info rounded-pill">${data.workers}</span>
+                            <span class="badge bg-info rounded-pill">${workers}</span>
                         </div>
                     </div>
                 `;

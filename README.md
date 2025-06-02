@@ -65,6 +65,35 @@ Ilova quyidagi komponentlardan iborat:
 
 5. Ilovaga veb-brauzeringizda `http://localhost:5000` orqali kiring
 
+### Docker bilan o'rnatish
+
+1. Repozitoriyani klonlash:
+   ```
+   git clone <repository-url>
+   cd ddos_detection_app
+   ```
+
+2. Docker Compose yordamida ilovani ishga tushiring:
+   ```
+   docker-compose up -d
+   ```
+
+3. Ilovaga veb-brauzeringizda `http://localhost:5000` orqali kiring
+
+4. Ilovani to'xtatish uchun:
+   ```
+   docker-compose down
+   ```
+
+#### Docker muhitini sozlash
+
+Docker Compose fayli quyidagi xizmatlarni o'z ichiga oladi:
+
+- **app**: Asosiy ilova (Flask va worker jarayonlari)
+- **redis**: Navbat xizmati uchun Redis
+
+Muhitni sozlash uchun `docker-compose.yml` faylidagi environment o'zgaruvchilarini o'zgartiring.
+
 ## Foydalanish
 
 ### Boshqaruv paneli
