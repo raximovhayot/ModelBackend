@@ -67,6 +67,12 @@ class FlowFeatures:
     idle_max: float = 0.0
     idle_min: float = 0.0
 
+    # Network identifiers
+    source_ip: str = ""
+    destination_ip: str = ""
+    source_port: int = 0
+    destination_port: int = 0
+
     @classmethod
     def from_json(cls, json_data: str) -> 'FlowFeatures':
         """
@@ -121,7 +127,11 @@ class FlowFeatures:
             idle_mean=data.get('idle_mean', 0.0),
             idle_std=data.get('idle_std', 0.0),
             idle_max=data.get('idle_max', 0.0),
-            idle_min=data.get('idle_min', 0.0)
+            idle_min=data.get('idle_min', 0.0),
+            source_ip=data.get('source_ip', ""),
+            destination_ip=data.get('destination_ip', ""),
+            source_port=data.get('source_port', 0),
+            destination_port=data.get('destination_port', 0)
         )
 
     def to_dict(self) -> Dict[str, Any]:
@@ -169,7 +179,11 @@ class FlowFeatures:
             'idle_mean': self.idle_mean,
             'idle_std': self.idle_std,
             'idle_max': self.idle_max,
-            'idle_min': self.idle_min
+            'idle_min': self.idle_min,
+            'source_ip': self.source_ip,
+            'destination_ip': self.destination_ip,
+            'source_port': self.source_port,
+            'destination_port': self.destination_port
         }
 
     def to_json(self) -> str:
@@ -255,11 +269,11 @@ class FlowFeatures:
             'Idle Max': self.idle_max,
             'Idle Min': self.idle_min,
 
-            # Network identifiers (not available in FlowFeatures)
-            'Source IP': '',  # Not available in FlowFeatures
-            'Destination IP': '',  # Not available in FlowFeatures
-            'Source Port': 0,  # Not available in FlowFeatures
-            'Destination Port': 0  # Not available in FlowFeatures
+            # Network identifiers
+            'Source IP': self.source_ip,
+            'Destination IP': self.destination_ip,
+            'Source Port': self.source_port,
+            'Destination Port': self.destination_port
         }
 
     def __str__(self) -> str:
@@ -280,5 +294,9 @@ class FlowFeatures:
             f"flow_packets_per_s={self.flow_packets_per_s}, "
             f"syn_flag_count={self.syn_flag_count}, "
             f"ack_flag_count={self.ack_flag_count}, "
-            f"urg_flag_count={self.urg_flag_count})"
+            f"urg_flag_count={self.urg_flag_count}, "
+            f"source_ip={self.source_ip}, "
+            f"destination_ip={self.destination_ip}, "
+            f"source_port={self.source_port}, "
+            f"destination_port={self.destination_port})"
         )
