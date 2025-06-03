@@ -35,7 +35,10 @@ def process_network_data(data, flow_features_dict):
         return None
 
     # Store data and prediction in database
-    network_data = DatabaseService.add_network_data(data, prediction_result)
+    # Import app only when needed to avoid circular imports
+    from app import app
+    with app.app_context():
+        network_data = DatabaseService.add_network_data(data, prediction_result)
 
     # Emit network data to connected clients - use lazy import to avoid circular dependency
     try:
