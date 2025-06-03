@@ -33,6 +33,9 @@ redis_conn = Redis.from_url(redis_url)
 # Initialize RQ queue
 queue = Queue('prediction_queue', connection=redis_conn)
 
+# Get model service instance
+model_service = ModelService()
+
 def process_network_data(data, flow_features_dict):
     """
     Process network data from the queue
@@ -45,9 +48,6 @@ def process_network_data(data, flow_features_dict):
         dict: The processed network data
     """
     logger.info("Processing network data from queue")
-
-    # Get model service instance
-    model_service = ModelService()
 
     # Make prediction
     logger.debug("Making prediction with model")

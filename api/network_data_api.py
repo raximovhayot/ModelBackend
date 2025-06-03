@@ -1,8 +1,6 @@
-from flask import request, jsonify
+from flask import request
 from flask_restful import Resource
-import json
 
-from models import ModelService
 from database import DatabaseService
 from flow.flow_features import FlowFeatures
 from queue_service import enqueue_network_data, get_queue_stats
@@ -11,12 +9,10 @@ class NetworkDataAPI(Resource):
     """
     API for receiving network data and making predictions
     """
-    def __init__(self, model_service):
-        self.model_service = model_service
 
     def post(self):
         """
-        Receive network data, enqueue for processing, and return job ID
+        Receive network data and enqueue for processing
         """
         try:
             # Get data from request
@@ -34,15 +30,10 @@ class NetworkDataAPI(Resource):
                 return {"error": f"Invalid flow features data: {str(e)}"}, 400
 
             # Enqueue data for processing
-            job_id = enqueue_network_data(data, flow_features.to_dict())
+            enqueue_network_data(data, flow_features.to_dict())
 
-            # Return job ID and status
-            return {
-                "success": True,
-                "message": "Network data enqueued for processing",
-                "job_id": job_id,
-                "queue_stats": get_queue_stats()
-            }, 202
+            # Return simple success response
+            return {"success": True}, 202
 
         except Exception as e:
             return {"error": str(e)}, 500
