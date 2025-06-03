@@ -329,6 +329,22 @@
                             probabilities: JSON.parse(detection.class_probabilities)
                         };
 
+                        // Create data property with network data fields
+                        detection.data = {
+                            source_ip: detection.source_ip,
+                            destination_ip: detection.destination_ip,
+                            source_port: detection.source_port,
+                            destination_port: detection.destination_port,
+                            protocol: detection.protocol,
+                            flow_duration: detection.flow_duration,
+                            flow_bytes_s: detection.flow_bytes_s,
+                            flow_packets_s: detection.flow_packets_s,
+                            packet_length_mean: detection.packet_length_mean,
+                            packet_length_std: detection.packet_length_std,
+                            packet_length_min: detection.packet_length_min,
+                            packet_length_max: detection.packet_length_max
+                        };
+
                         addDetection(detection);
                     }
                 }

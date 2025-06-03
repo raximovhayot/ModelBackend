@@ -40,16 +40,19 @@ def process_network_data(data, flow_features_dict):
     with app.app_context():
         network_data = DatabaseService.add_network_data(data, prediction_result)
 
-    # Emit network data to connected clients - use lazy import to avoid circular dependency
-    try:
-        # Import only when needed to avoid circular imports
-        from app import emit_network_data
-        emit_network_data(network_data)
-    except ImportError as e:
-        print(f"Warning: Could not emit network data: {str(e)}")
-        # Continue processing even if emit fails
+        # Emit network data to connected clients - use lazy import to avoid circular dependency
+        try:
+            # Import only when needed to avoid circular imports
+            from app import emit_network_data
+            emit_network_data(network_data)
+        except ImportError as e:
+            print(f"Warning: Could not emit network data: {str(e)}")
+            # Continue processing even if emit fails
 
-    return network_data.to_dict()
+        # Convert to dictionary while still in session
+        network_data_dict = network_data.to_dict()
+
+    return network_data_dict
 
 def enqueue_network_data(data, flow_features_dict):
     """
