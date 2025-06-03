@@ -19,6 +19,8 @@ Ilova quyidagi komponentlardan iborat:
 - **Bashorat xizmati**: Tarmoq trafigini tasniflash uchun Random Forest modelidan foydalanadi
 - **Ma'lumotlar bazasi**: Tarmoq ma'lumotlari va bashorat natijalarini saqlaydi
 - **WebSocket Server**: UI ga real vaqt rejimida yangilanishlarni taqdim etadi
+- **Queue Service**: Bashorat vazifalarini navbatga qo'yish va qayta ishlash
+- **Utils**: Umumiy funksionallik va yordamchi funksiyalar
 
 ### Frontend
 - **Boshqaruv paneli**: Real vaqt rejimida tarmoq trafigi va hujum aniqlanishini ko'rsatadi

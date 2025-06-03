@@ -4,6 +4,7 @@ from redis import Redis
 from rq import Queue, Worker
 from models import ModelService
 from database import DatabaseService
+from utils.socketio_utils import emit_network_data
 
 # Initialize Redis connection
 redis_url = os.environ.get('REDIS_URL', 'redis://:root123@localhost:6379/0')
@@ -40,11 +41,11 @@ def process_network_data(data, flow_features_dict):
     with app.app_context():
         network_data = DatabaseService.add_network_data(data, prediction_result)
 
-        # Emit network data to connected clients - use lazy import to avoid circular dependency
+        # Emit network data to connected clients
         try:
             # Import only when needed to avoid circular imports
-            from app import emit_network_data
-            emit_network_data(network_data)
+            from app import socketio
+            emit_network_data(socketio, network_data)
         except ImportError as e:
             print(f"Warning: Could not emit network data: {str(e)}")
             # Continue processing even if emit fails

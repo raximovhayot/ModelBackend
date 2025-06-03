@@ -8,6 +8,7 @@ from models import ModelService
 from database import init_db, DatabaseService
 from api import NetworkDataAPI, NetworkDataListAPI, NetworkDataDetailAPI, NetworkDataByLabelAPI
 from api.network_data_api import QueueStatsAPI
+from utils.socketio_utils import emit_network_data
 
 # Create Flask app
 app = Flask(__name__)
@@ -126,57 +127,10 @@ def handle_disconnect():
     """
     print('Client disconnected')
 
-# Function to emit network data to connected clients
-def emit_network_data(network_data):
-    """
-    Emit network data to connected clients
 
-    Args:
-        network_data (NetworkData): Network data to emit
-    """
-    # Convert to dictionary
-    data = network_data.to_dict()
-
-    # Parse class probabilities
-    if data['class_probabilities']:
-        probabilities = json.loads(data['class_probabilities'])
-    else:
-        probabilities = {}
-
-    # Create prediction object
-    prediction = {
-        'class': data['predicted_class'],
-        'label': data['predicted_label'],
-        'confidence': data['prediction_confidence'],
-        'probabilities': probabilities
-    }
-
-    # Create data object
-    network_data_dict = {
-        'id': data['id'],
-        'timestamp': data['timestamp'],
-        'prediction': prediction,
-        'data': {
-            'flow_duration': data['flow_duration'],
-            'protocol': data['protocol'],
-            'flow_bytes_s': data['flow_bytes_s'],
-            'flow_packets_s': data['flow_packets_s'],
-            'packet_length_mean': data['packet_length_mean'],
-            'packet_length_std': data['packet_length_std'],
-            'packet_length_min': data['packet_length_min'],
-            'packet_length_max': data['packet_length_max'],
-            'source_ip': data['source_ip'],
-            'destination_ip': data['destination_ip'],
-            'source_port': data['source_port'],
-            'destination_port': data['destination_port']
-        }
-    }
-
-    # Emit to all connected clients
-    socketio.emit('new_network_data', network_data_dict)
-
-# Run the app
+# Run the app if executed directly
 if __name__ == '__main__':
+    # This is for development only - use run.py for production
     port = int(os.environ.get('PORT', 5000))
     # Using eventlet as the async mode for better performance
     socketio.run(app, host='0.0.0.0', port=port, debug=True, use_reloader=True)
