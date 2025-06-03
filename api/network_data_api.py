@@ -131,3 +131,23 @@ class QueueStatsAPI(Resource):
 
         except Exception as e:
             return {"error": str(e)}, 500
+
+class ChartStatsAPI(Resource):
+    """
+    API for retrieving chart statistics
+    """
+    def get(self):
+        """
+        Get statistics for charts, including label distribution for pie chart
+        """
+        try:
+            # Get label distribution for pie chart
+            label_distribution = DatabaseService.get_label_distribution()
+
+            # Return the statistics
+            return {
+                "label_distribution": label_distribution
+            }, 200
+
+        except Exception as e:
+            return {"error": str(e)}, 500

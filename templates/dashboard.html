@@ -110,7 +110,7 @@
                         </div>
                     </div>
                 `;
-                
+
                 document.getElementById('queue-stats').innerHTML = html;
             })
             .catch(error => {
@@ -214,47 +214,32 @@
             }
         });
 
-        // Fetch network data for statistics
-        fetch('/api/network-data/list?limit=100')
+        // Fetch chart statistics for pie diagram
+        fetch('/api/chart-stats')
             .then(response => response.json())
             .then(data => {
-                if (data.count > 0) {
-                    // Update detection distribution chart
-                    const counts = {
-                        'Benign': 0,
-                        'Syn': 0,
-                        'UDP': 0,
-                        'UDPLag': 0,
-                        'LDAP': 0,
-                        'MSSQL': 0,
-                        'NetBIOS': 0,
-                        'Portmap': 0
-                    };
-                    
-                    for (const detection of data.data) {
-                        if (counts[detection.predicted_label] !== undefined) {
-                            counts[detection.predicted_label]++;
-                        }
-                    }
-                    
+                if (data.label_distribution) {
+                    // Update detection distribution chart with data from API
+                    const distribution = data.label_distribution;
+
                     distributionChart.data.datasets[0].data = [
-                        counts['Benign'],
-                        counts['Syn'],
-                        counts['UDP'],
-                        counts['UDPLag'],
-                        counts['LDAP'],
-                        counts['MSSQL'],
-                        counts['NetBIOS'],
-                        counts['Portmap']
+                        distribution['Benign'],
+                        distribution['Syn'],
+                        distribution['UDP'],
+                        distribution['UDPLag'],
+                        distribution['LDAP'],
+                        distribution['MSSQL'],
+                        distribution['NetBIOS'],
+                        distribution['Portmap']
                     ];
                     distributionChart.update();
                 }
             })
-            .catch(error => console.error('Error fetching network data:', error));
+            .catch(error => console.error('Error fetching chart statistics:', error));
 
         // Fetch initial queue stats
         updateQueueStats();
-        
+
         // Update queue stats every 5 seconds
         setInterval(updateQueueStats, 5000);
     });

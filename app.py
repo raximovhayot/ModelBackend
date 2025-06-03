@@ -7,8 +7,7 @@ from flask_socketio import SocketIO
 
 from models import ModelService
 from database import init_db, DatabaseService
-from api import NetworkDataAPI, NetworkDataListAPI, NetworkDataDetailAPI, NetworkDataByLabelAPI
-from api.network_data_api import QueueStatsAPI
+from api import NetworkDataAPI, NetworkDataListAPI, NetworkDataDetailAPI, NetworkDataByLabelAPI, QueueStatsAPI, ChartStatsAPI
 from utils.socketio_utils import emit_network_data
 
 # Configure logging
@@ -55,6 +54,7 @@ api.add_resource(NetworkDataListAPI, '/api/network-data/list')
 api.add_resource(NetworkDataDetailAPI, '/api/network-data/<int:id>')
 api.add_resource(NetworkDataByLabelAPI, '/api/network-data/label/<string:label>')
 api.add_resource(QueueStatsAPI, '/api/queue-stats')
+api.add_resource(ChartStatsAPI, '/api/chart-stats')
 
 # Frontend routes
 @app.route('/')

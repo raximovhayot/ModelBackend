@@ -4,6 +4,7 @@ import os
 import random
 import time
 from glob import glob
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import pandas as pd
 import requests
@@ -138,10 +139,12 @@ def main():
                         help='Types of attacks to filter from parquet files')
     parser.add_argument('--data-dir', type=str, default='mock_data',
                         help='Directory containing parquet data files')
+    parser.add_argument('--workers', type=int, default=10,
+                        help='Number of worker threads for parallel requests')
 
     args = parser.parse_args()
 
-    print(f"Starting tester with {args.count} requests at {args.interval}s intervals")
+    print(f"Starting tester with {args.count} requests at {args.interval}s intervals using {args.workers} worker threads")
     print(f"Reading data from {args.data_dir}")
 
     # Get all parquet files in the data directory
@@ -174,20 +177,35 @@ def main():
 
     print(f"Sending {len(records_to_send)} records to API at {args.api_url}")
 
-    for i, (data, attack_type) in enumerate(records_to_send):
-        # Post to API
-        print(f"\nRequest {i+1}/{len(records_to_send)} - Attack ({attack_type})")
+    # Function to process a single request and return results
+    def process_request(index, data_attack):
+        data, attack_type = data_attack
+        print(f"\nSubmitting request {index+1}/{len(records_to_send)} - Attack ({attack_type})")
         response = post_to_api(data, args.api_url)
+        return index, attack_type, response
 
-        if 'error' in response:
-            print(f"Error: {response['error']}")
-        else:
-            print(f"Status: {response['status_code']}")
-            print(f"Response: {response['response']}")
+    # Use ThreadPoolExecutor to send requests in parallel
+    with ThreadPoolExecutor(max_workers=args.workers) as executor:
+        # Submit all tasks but control submission rate with interval
+        futures = []
+        for i, data_attack in enumerate(records_to_send):
+            future = executor.submit(process_request, i, data_attack)
+            futures.append(future)
+            if i < len(records_to_send) - 1:
+                time.sleep(args.interval)  # Control submission rate
 
-        # Wait for the specified interval
-        if i < len(records_to_send) - 1:
-            time.sleep(args.interval)
+        # Process results as they complete
+        for future in as_completed(futures):
+            try:
+                index, attack_type, response = future.result()
+                print(f"\nCompleted request {index+1}/{len(records_to_send)} - Attack ({attack_type})")
+                if 'error' in response:
+                    print(f"Error: {response['error']}")
+                else:
+                    print(f"Status: {response['status_code']}")
+                    print(f"Response: {response['response']}")
+            except Exception as exc:
+                print(f"Request generated an exception: {exc}")
 
     print("\nTesting completed!")
 

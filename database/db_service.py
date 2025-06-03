@@ -107,3 +107,38 @@ class DatabaseService:
         count = NetworkData.query.delete()
         db.session.commit()
         return count
+
+    @staticmethod
+    def get_label_distribution():
+        """
+        Get the distribution of predicted labels in the database
+
+        Returns:
+            dict: Dictionary with label counts
+        """
+        from sqlalchemy import func
+
+        # Query the database to count occurrences of each label
+        result = db.session.query(
+            NetworkData.predicted_label, 
+            func.count(NetworkData.id)
+        ).group_by(NetworkData.predicted_label).all()
+
+        # Convert to dictionary
+        distribution = {
+            'Benign': 0,
+            'Syn': 0,
+            'UDP': 0,
+            'UDPLag': 0,
+            'LDAP': 0,
+            'MSSQL': 0,
+            'NetBIOS': 0,
+            'Portmap': 0
+        }
+
+        # Update with actual counts
+        for label, count in result:
+            if label in distribution:
+                distribution[label] = count
+
+        return distribution
