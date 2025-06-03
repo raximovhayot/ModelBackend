@@ -57,10 +57,17 @@ class ModelService:
             data = pd.DataFrame([data])
 
         # Get the features that the model was trained on
-        # These are the features that were used in the notebook after feature selection
+        # These are all the features that the model was trained on (32 features)
         model_features = [
-            'Flow Duration', 'Protocol', 'Flow Bytes/s', 'Flow Packets/s',
-            'Packet Length Mean', 'Packet Length Std', 'Packet Length Min', 'Packet Length Max'
+            'Flow Duration', 'Protocol', 'Total Fwd Packets', 'Total Backward Packets',
+            'Fwd Packet Length Total', 'Bwd Packet Length Total', 'Fwd Packet Length Max',
+            'Fwd Packet Length Min', 'Fwd Packet Length Std', 'Bwd Packet Length Max',
+            'Bwd Packet Length Min', 'Packet Length Max', 'Packet Length Mean',
+            'Flow Bytes/s', 'Flow Packets/s', 'Bwd Packets/s',
+            'Flow IAT Mean', 'Flow IAT Min', 'Fwd IAT Total', 'Fwd IAT Mean',
+            'Fwd IAT Min', 'Bwd IAT Total', 'Bwd IAT Mean', 'Bwd IAT Min',
+            'Fwd Header Length', 'Bwd Header Length', 'SYN Flag Count', 'ACK Flag Count',
+            'URG Flag Count', 'Down/Up Ratio', 'Active Mean', 'Active Std'
         ]
 
         # Filter the data to include only the features that the model was trained on
