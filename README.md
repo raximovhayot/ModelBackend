@@ -253,7 +253,3 @@ Tizim DDoS hujumlarini aniqlash va tasniflash uchun **CICDDoS2019** ma'lumotlar 
 - NumPy
 - Matplotlib
 - seaborn
-
-## Litsenziya
-
-Ushbu loyiha MIT litsenziyasi ostida litsenziyalangan - tafsilotlar uchun LICENSE faylini ko'ring.
