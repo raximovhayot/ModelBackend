@@ -9,6 +9,14 @@ class NetworkDataAPI(Resource):
     """
     API for receiving network data and making predictions
     """
+    def __init__(self, model_service=None):
+        """
+        Initialize the API with the model service
+
+        Args:
+            model_service: The model service to use for predictions
+        """
+        self.model_service = model_service
 
     def post(self):
         """

@@ -1,10 +1,11 @@
-import os
-import json
 import logging
-from redis import Redis
+import os
+
 from rq import Queue, Worker
-from models import ModelService
+
 from database import DatabaseService
+from models import ModelService
+from utils.redis_utils import get_redis_connection
 from utils.socketio_utils import emit_network_data
 
 # Configure logging
@@ -19,16 +20,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Initialize Redis connection
-redis_url = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
-# Get Redis password from environment variable if available
-redis_password = os.environ.get('REDIS_PASSWORD', 'root123')
-if redis_password and 'redis://:' not in redis_url:
-    # Insert password into URL if not already present
-    parts = redis_url.split('://')
-    if len(parts) == 2:
-        redis_url = f"{parts[0]}://:{redis_password}@{parts[1]}"
-
-redis_conn = Redis.from_url(redis_url)
+redis_conn = get_redis_connection()
 
 # Initialize RQ queue
 queue = Queue('prediction_queue', connection=redis_conn)
