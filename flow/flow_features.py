@@ -201,7 +201,7 @@ class FlowFeatures:
         return {
             # Basic flow information
             'Flow Duration': self.flow_duration,
-            'Protocol': str(self.protocol),
+            'Protocol': int(self.protocol),
             'Total Fwd Packets': self.total_fwd_packets,
             'Total Backward Packets': self.total_backward_packets,
 
