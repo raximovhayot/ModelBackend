@@ -129,7 +129,7 @@ def main():
     parser = argparse.ArgumentParser(description='Read and send network traffic data from parquet files')
     parser.add_argument('--api-url', type=str, default='http://localhost:5000/api/network-data',
                         help='URL of the network data API')
-    parser.add_argument('--count', type=int, default=100,
+    parser.add_argument('--count', type=int, default=500,
                         help='Number of requests to send')
     parser.add_argument('--interval', type=float, default=1.0,
                         help='Interval between requests in seconds')

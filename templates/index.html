@@ -257,7 +257,16 @@
 
     // Listen for new network data events from the server
     socket.on('new_network_data', function(data) {
+        console.log('Received new network data:', data);
+
+        // Add the detection to the UI
         addDetection(data);
+
+        // If this is an attack (not Benign), update the latest detection card
+        if (data.prediction.label !== 'Benign') {
+            console.log('Updating latest attack detection:', data);
+            updateLatestDetection(data);
+        }
     });
 
     // Function to update queue statistics
@@ -314,12 +323,14 @@
 
     // Fetch initial data when the page loads
     document.addEventListener('DOMContentLoaded', function() {
-        // Fetch network data
-        fetch('/api/network-data/list?limit=10')
+        // Fetch all network data
+        fetch('/api/network-data/list')
             .then(response => response.json())
             .then(data => {
                 if (data.count > 0) {
-                    // Add each detection to the UI
+                    let lastAttack = null;
+
+                    // Add each detection to the UI and find the last attack
                     for (const detection of data.data.reverse()) {
                         // Convert class_probabilities from string to object
                         detection.prediction = {
@@ -345,7 +356,17 @@
                             packet_length_max: detection.packet_length_max
                         };
 
+                        // Check if this is an attack (not Benign)
+                        if (detection.prediction.label !== 'Benign' && !lastAttack) {
+                            lastAttack = detection;
+                        }
+
                         addDetection(detection);
+                    }
+
+                    // If we found an attack, update the latest detection card with it
+                    if (lastAttack) {
+                        updateLatestDetection(lastAttack);
                     }
                 }
             })

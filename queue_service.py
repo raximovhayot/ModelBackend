@@ -60,9 +60,11 @@ def process_network_data(data, flow_features_dict):
         try:
             # Import only when needed to avoid circular imports
             from app import socketio
+            logger.info(f"Emitting network data with ID: {network_data.id}")
             emit_network_data(socketio, network_data)
-        except ImportError as e:
-            logger.warning(f"Could not emit network data: {str(e)}")
+            logger.info(f"Successfully emitted network data with ID: {network_data.id}")
+        except Exception as e:
+            logger.error(f"Could not emit network data: {str(e)}", exc_info=True)
             # Continue processing even if emit fails
 
         # Convert to dictionary while still in session
