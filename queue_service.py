@@ -58,9 +58,10 @@ def process_network_data(data, flow_features_dict):
 
         # Emit network data to connected clients
         try:
-            # Import only when needed to avoid circular imports
-            from app import socketio
+            # Use Flask current_app to get the socketio instance
+            from flask import current_app
             logger.info(f"Emitting network data with ID: {network_data.id}")
+            socketio = current_app.extensions['socketio']
             emit_network_data(socketio, network_data)
             logger.info(f"Successfully emitted network data with ID: {network_data.id}")
         except Exception as e:
