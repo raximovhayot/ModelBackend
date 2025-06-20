@@ -96,6 +96,10 @@ Docker Compose fayli quyidagi xizmatlarni o'z ichiga oladi:
 
 Muhitni sozlash uchun `docker-compose.yml` faylidagi environment o'zgaruvchilarini o'zgartiring.
 
+### Batafsil o'rnatish yo'riqnomasi
+
+Ilovani o'rnatish va ishga tushirish bo'yicha batafsil yo'riqnoma uchun [DEPLOYMENT.md](DEPLOYMENT.md) fayliga qarang. Bu hujjat mahalliy va Docker o'rnatish, ishlab chiqarish muhitiga o'rnatish va muammolarni bartaraf etish bo'yicha batafsil ma'lumotlarni o'z ichiga oladi.
+
 ## Foydalanish
 
 ### Boshqaruv paneli
